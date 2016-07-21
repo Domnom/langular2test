@@ -1,60 +1,69 @@
-application:
-    build: ./laravel/laradock/application
-    volumes:
-        - ./laravel/:/var/www/laravel/
+version: '2'
 
-data:
-    build: ./laravel/laradock/data
-    volumes:
-        - /var/lib/mysql:/var/lib/mysql
+services:
 
-php-fpm:
-    build: ./laravel/laradock/php-fpm
-    dockerfile: Dockerfile-70
-    volumes_from:
-        - application
-    expose:
-        - "9000"
-    links:
-        - workspace
+    nginx:
+        build: ./laravel/laradock/nginx
+        volumes_from:
+            - volumes_source
+        volumes:
+            - ./logs/nginx/:/var/log/nginx
+        ports:
+            - "80:80"
+            - "443:443"
+        links:
+            - php-fpm
 
-nginx:
-    build: ./laravel/laradock/nginx
-    volumes_from:
-        - application
-    volumes:
-        - ./logs/nginx/:/var/log/nginx
-    ports:
-        - "80:80"
-        - "443:443"
-    links:
-        - php-fpm
+    php-fpm:
+        build: ./laravel/laradock/php-fpm
+        dockerfile: Dockerfile-70
+        volumes_from:
+            - volumes_source
+        expose:
+            - "9000"
+        links:
+            - workspace
 
 
-mysql:
-    build: ./laravel/laradock/mysql
-    volumes_from:
-        - data
-    ports:
-        - "3306:3306"
-    environment:
-        MYSQL_DATABASE: my_new_database
-        MYSQL_USER: domo
-        MYSQL_PASSWORD: mys092500
-        MYSQL_ROOT_PASSWORD: mys092500
+
+    mysql:
+        build: ./laravel/laradock/mysql
+        volumes_from:
+            - volumes_data
+        ports:
+            - "3306:3306"
+        environment:
+            MYSQL_DATABASE: my_new_database
+            MYSQL_USER: domo
+            MYSQL_PASSWORD: mys092500
+            MYSQL_ROOT_PASSWORD: mys092500
 
 
-workspace:
-    build: ./laravel/laradock/workspace
-    volumes_from:
-        - application
-    tty: true
+    frontend:
+        build: .
+        ports:
+         - 8080:8080
+        volumes:
+         - ./angular2:/var/www/angular
+         - ./nginx:/etc/nginx
 
 
-frontend:
-    build: .
-    ports:
-     - 8080:8080
-    volumes:
-     - ./angular2:/var/www/angular
-     - ./nginx:/etc/nginx
+    workspace:
+        build: ./laravel/laradock/workspace
+        volumes_from:
+            - volumes_source
+        tty: true
+
+    ### Laravel Application Code Container ######################
+
+    volumes_source:
+        build: ./laravel/laradock/volumes/application
+        volumes:
+            - ./laravel/:/var/www/laravel
+
+    ### Databases Data Container ################################
+
+    volumes_data:
+        build: ./laravel/laradock/volumes/data
+        volumes:
+            - /var/lib/mysql:/var/lib/mysql
