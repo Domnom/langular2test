@@ -38,8 +38,8 @@ mysql:
     ports:
         - "3306:3306"
     environment:
-        MYSQL_DATABASE: langular_sxd
-        MYSQL_USER: kitset
+        MYSQL_DATABASE: my_new_database
+        MYSQL_USER: domo
         MYSQL_PASSWORD: mys092500
         MYSQL_ROOT_PASSWORD: mys092500
 
@@ -54,7 +54,7 @@ workspace:
 frontend:
     build: .
     ports:
-     - 8080:80
+     - 8080:8080
     volumes:
      - ./angular2:/var/www/angular
      - ./nginx:/etc/nginx
