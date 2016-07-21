@@ -15,8 +15,9 @@ services:
             - php-fpm
 
     php-fpm:
-        build: ./laravel/laradock/php-fpm
-        dockerfile: Dockerfile-70
+        build: 
+            context: ./laravel/laradock/php-fpm
+            dockerfile: Dockerfile-70
         volumes_from:
             - volumes_source
         expose:
@@ -49,7 +50,10 @@ services:
 
 
     workspace:
-        build: ./laravel/laradock/workspace
+        build: 
+            context: ./laravel/laradock/workspace
+            args:
+                - INSTALL_PRESTISSIMO=false
         volumes_from:
             - volumes_source
         tty: true
