@@ -1,0 +1,60 @@
+application:
+    build: ./laravel/laradock/application
+    volumes:
+        - ./laravel/:/var/www/laravel/
+
+data:
+    build: ./laravel/laradock/data
+    volumes:
+        - /var/lib/mysql:/var/lib/mysql
+
+php-fpm:
+    build: ./laravel/laradock/php-fpm
+    dockerfile: Dockerfile-70
+    volumes_from:
+        - application
+    expose:
+        - "9000"
+    links:
+        - workspace
+
+nginx:
+    build: ./laravel/laradock/nginx
+    volumes_from:
+        - application
+    volumes:
+        - ./logs/nginx/:/var/log/nginx
+    ports:
+        - "80:80"
+        - "443:443"
+    links:
+        - php-fpm
+
+
+mysql:
+    build: ./laravel/laradock/mysql
+    volumes_from:
+        - data
+    ports:
+        - "3306:3306"
+    environment:
+        MYSQL_DATABASE: langular_sxd
+        MYSQL_USER: kitset
+        MYSQL_PASSWORD: mys092500
+        MYSQL_ROOT_PASSWORD: mys092500
+
+
+workspace:
+    build: ./laravel/laradock/workspace
+    volumes_from:
+        - application
+    tty: true
+
+
+frontend:
+    build: .
+    ports:
+     - 8080:80
+    volumes:
+     - ./angular2:/var/www/angular
+     - ./nginx:/etc/nginx
